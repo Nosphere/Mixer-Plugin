@@ -1,5 +1,5 @@
 {
-    "version": "0.3.0",
+    "version": "0.3.2",
     "notes": {
         "credits": [
             "NoxDraconem for alpha, beta, delta and omega testing."
@@ -7,9 +7,10 @@
         "changes": [
             "Changed from Beam.pro to Mixer.com.",
             "Redirected update checks to new mixer.com repository.",
-            "Featured streamer names will be the mixer blue color."
+            "Can now add multiple users at once."
         ],
         "fixes": [
+            "Fixed status check adding an undefined user."
         ],
 
         "issues": [
