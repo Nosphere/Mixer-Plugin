@@ -1,0 +1,23 @@
+{
+    "version": "0.3.0",
+    "notes": {
+        "credits": [
+            "NoxDraconem for alpha, beta, delta and omega testing."
+        ],
+        "changes": [
+            "Changed from Beam.pro to Mixer.com.",
+            "Redirected update checks to new mixer.com repository.",
+            "Featured streamer names will be the mixer blue color."
+        ],
+        "fixes": [
+        ],
+
+        "issues": [
+            "Going to the friends list in discord makes the button have incorrect color"
+        ],
+        "todo": [
+            "Popout needs to close on outside clicks",
+            "Needs more testing with co-streaming."
+        ]
+    }
+}
