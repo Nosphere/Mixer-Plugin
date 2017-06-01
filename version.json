@@ -1,5 +1,5 @@
 {
-    "version": "0.3.2",
+    "version": "0.3.21",
     "notes": {
         "credits": [
             "NoxDraconem for alpha, beta, delta and omega testing."
@@ -7,14 +7,18 @@
         "changes": [
             "Changed from Beam.pro to Mixer.com.",
             "Redirected update checks to new mixer.com repository.",
-            "Can now add multiple users at once."
+            "Can now add multiple users at once.",
+            "Featured streamers will now have <span style=\"color: rgb(31, 186, 237);\">Mixer blue color</span>"
         ],
         "fixes": [
+            "Status check was not firing correctly.",
             "Fixed status check adding an undefined user."
         ],
 
         "issues": [
-            "Going to the friends list in discord makes the button have incorrect color"
+            "Going to the friends list in discord makes the button have incorrect color",
+            "If the popup is open while status check is being done duplicate streamrs will be added, this is just a display bug and does not affect the config file at all.",
+            "Update notification alert is being created 2 times."
         ],
         "todo": [
             "Popout needs to close on outside clicks",

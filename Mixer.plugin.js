@@ -222,7 +222,6 @@ class Mixer
     }
 
     createCard(user) {
-        console.log(user);
         let stat = (user.online === false) ? 'invisible' : 'online';
         let container = $('<div/>', {'class': 'channel-members message-group hide-overflow', 'css': {'max-width': '100%', 'cursor': 'pointer'}}),
             avatar  = $('<div/>', {'class': 'avatar-small'}),
@@ -236,11 +235,12 @@ class Mixer
             name    = $('<span/>', {'class': 'username-wrapper'}),
             stamp   = $('<span/>', {'class': 'timestamp'}),
             text    = $('<div/>', {'class': 'message-text markup', 'css': {'font-size': '90%', 'line-height': '1.1'}});
+        let clr = (user.featured === true) ? 'color: rgb(31, 186, 237)' : '';
         container.append(
             avatar.append(status).css('background-image', 'url("' + user.user.avatarUrl + '")'),
             comment.append(message.append(
                 body.append(header.append(
-                    name.html('<strong style="text-transform:none;">' + user.user.username + '</strong>')
+                    name.html('<strong style="text-transform:none;' + clr + '">' + user.user.username + '</strong>')
                 )),
                 text.text(user.name)
             )),
@@ -284,7 +284,7 @@ class Mixer
     }
 
     checkUser(name) {
-        name = name || Object.keys(this.config.users).join(';');
+        name = name;
         $.get('https://mixer.com/api/v1/channels?where=token:in:' + name, {cache: $.now()}, (data) => {
             if(data.length === 0) {
                 this.notify = 'Failed to get user data for user: ' + name;
@@ -366,14 +366,12 @@ class Mixer
                 }
             }
         }).fail((err) => {
-            this.trace('Update check failed:', err);
             this.alert('Update Check', 'Failed to check for updates!');
         });
     }
 
     observer() {
         this.button = this.icon;
-        console.log(this.button.parent());
         if($('.mixer-button')[0] === undefined && this.toolbar[0] !== undefined) {
             this.toolbar.prepend(this.button);
         }
@@ -394,7 +392,7 @@ class Mixer
     }
 
     unload() {
-        //this.config = true; // save config
+        this.config = true; // save config
     }
 
     start() {
@@ -417,10 +415,8 @@ class Mixer
         }));
 
         this._update = setInterval(() => {
-            if(this.config.users.length > 0) {
-                this.checkUser();
-            }
-        }, (60 * 1000) * 2);
+            this.checkUser(Object.keys(this.config.users).join(';'));
+        }, (60 * 1000) * 3);
     }
 
     stop() {
