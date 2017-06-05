@@ -1,28 +1,30 @@
 {
-    "version": "0.3.21",
+    "version": "0.3.23",
     "notes": {
         "credits": [
             "NoxDraconem for alpha, beta, delta and omega testing."
         ],
         "changes": [
-            "Changed from Beam.pro to Mixer.com.",
-            "Redirected update checks to new mixer.com repository.",
             "Can now add multiple users at once.",
-            "Featured streamers will now have <span style=\"color: rgb(31, 186, 237);\">Mixer blue color</span>"
+            "Featured streamers will now have <span style=\"color: rgb(31, 186, 237);\">Mixer blue color</span>",
+            "If the streamer is hosting someone the status circle will be purple and emebeds will be redirected to the hosted streamer."
         ],
         "fixes": [
+            "<s>Popup now closes on outside clicks.</s>",
             "Status check was not firing correctly.",
-            "Fixed status check adding an undefined user."
+            "Fixed status check adding an undefined user.",
+            "Fixed update notification being created more then once.",
+            "Notification that pops up when the user cannot be found is now correctly showing over other elements."
         ],
 
         "issues": [
             "Going to the friends list in discord makes the button have incorrect color",
-            "If the popup is open while status check is being done duplicate streamrs will be added, this is just a display bug and does not affect the config file at all.",
-            "Update notification alert is being created 2 times."
+            "If the popup is open while status check is being done duplicate streamers will be added, this is just a display bug and does not affect the config file at all.",
+            "<s>Update notification alert is being created 2 times.</s>"
         ],
         "todo": [
-            "Popout needs to close on outside clicks",
-            "Needs more testing with co-streaming."
+            "Needs more testing with co-streaming.",
+            "Popout needs to close on outside clicks"
         ]
     }
 }

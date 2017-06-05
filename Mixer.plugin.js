@@ -15,6 +15,7 @@ class Mixer
                 active: false,
                 video: false,
                 offline: false,
+                interactive: false,
                 current: 0,
                 users: {}
             }, bdPluginStorage.get('Plugin', 'config'));
@@ -41,11 +42,10 @@ class Mixer
 
     get dropdown() {
         if(this._dropdown === undefined) {
-            this._dropdown = $('<div/>', {'class': 'popout'}); // requires parent classs theme-dark or theme-light
+            this._dropdown = $('<div/>', {'class': 'popout'}); // requires parent class theme-dark or theme-light
             let wrapper  = $('<div/>', {'class': 'messages-popout-wrap themed-popout'}),
                 header   = $('<div/>', {'class': 'header'}),
                 title    = $('<div/>', {'class': 'title'}),
-                opts     = $('<div/>', {'class': 'options ui-flex flex-horizontal'}),
                 scroll   = $('<div/>', {'class': 'scroller-wrap ' + this.theme}), // needs theme class dark/light
                 scroller = $('<div/>', {'class': 'scroller messages-popout', 'css': {'max-height': '360px'}}),
                 footer   = $('<div/>', {'class': 'footer'});
@@ -59,12 +59,15 @@ class Mixer
                     } else {
                         this.detach();
                     }
-                })),
-                opts.append(this.createInput('Search...').on('keyup', (evt) => {
+                }),
+                this.createInput('Search...').on('keyup', (evt) => {
                     if(evt.which === 13) {
                         this.checkUser($(evt.target).val());
+                        setTimeout(() => {
+                            $(evt.target).val('');
+                        }, 3000);
                     }
-                })).css('padding', '10px 20px'),
+                }).css('margin-top', '8px')),
                 scroll.append(scroller),
                 footer.append(
                     this.createToggle('Video', this.config.video, (evt) => {
@@ -79,7 +82,13 @@ class Mixer
                     this.createToggle('Offline', this.config.offline, (evt) => {
                         this.config.offline = evt.target.checked;
                         this.config = true;
-                    })
+                        this.dropdown = false;
+                        this.list();
+                    })/*,
+                    this.createToggle('Controls', this.config.interactive, (evt) => {
+                        this.config.interactive = evt.target.checked;
+                        this.config = true;
+                    })*/
                 ).css({'height': 'auto', 'text-align': 'left'})
             )).toggle();
         }
@@ -87,35 +96,47 @@ class Mixer
     }
 
     set dropdown(s) {
+        if(this.dropdown.find('.empty-placeholder')[0] !== undefined) {
+            this.dropdown.find('.empty-placeholder').remove();
+        }
         if(s === false) {
             this.dropdown.find('.scroller').empty();
         } else {
             this.dropdown.find('.scroller').append(s);
         }
     }
-
+// <iframe allowfullscreen="true" src="https://mixer.com/embed/controls/4339232"></iframe>
     set notify(s) {
         let notify = $('<div/>', {'css': {
-            'width': '70%',
+            'width': '50%',
             'position': 'absolute',
-            'bottom': '10px',
+            'z-index': '99999',
+            'bottom': '-110px',
             'left': $(window).width() / 2,
             'transform': 'translateX(-50%)',
-            'background': 'rgba(0,0,0, 0.7)',
+            'background': 'rgba(12,12,12, 0.65)',
             'color': 'white',
             'font-size': '20px',
             'padding': '20px 20px',
             'border-radius': '5px'
         }});
-        this.modal.append(notify.text(s));
+        this.modal.append(notify.text(s).animate({
+            'bottom': '15px'
+
+        }, 700));
         setTimeout(() => {
-            notify.remove();
+            notify.animate({
+                'bottom': '-110px'
+            }, 350, () => {
+                notify.remove();
+            });
         }, 5000);
     }
 
     get theme() {
-        let el = $('div[class*="theme-"]:not(".app")');
-        return (el[0] === undefined) ? 'dark' : el.attr('class').replace('theme-', '');
+        let el = $('*[class*="theme-"]:not(".app")');
+        console.log(el.eq(0).attr('class'));
+        return (el[0] === undefined) ? 'dark' : el.eq(0).attr('class').replace('theme-', '');
     }
 
     get toolbar() {
@@ -217,12 +238,30 @@ class Mixer
         this.chat.attr('src', this.embed.replace('{{EMBED}}', 'chat').replace('{{ID}}', id));
     }
 
+    /**
+     * @return jQuery Returns jQuery object for the chat iframe
+     */
+    get interactive() {
+        if(this._interactive === undefined) {
+            this._chat = $('<iframe/>', {'css': {'flex': '1'}});
+        }
+        return this._interactive;
+    }
+
+    /**
+     * Sets the url for the chat embed
+     * @param int id User ID
+     */
+    set interactive(id) {
+        this.interactive.attr('src', this.embed.replace('{{EMBED}}', 'controls').replace('{{ID}}', id));
+    }
+
     get github() {
-        return 'https://raw.githubusercontent.com/Nosphere/Mixer-Plugin/master/{{FILE}}?now=1496035380197';
+        return 'https://raw.githubusercontent.com/Nosphere/Mixer-Plugin/master/{{FILE}}';
     }
 
     createCard(user) {
-        let stat = (user.online === false) ? 'invisible' : 'online';
+        let stat = (user.hosteeId !== null) ? 'streaming' : ((user.online === false) ? 'invisible' : 'online');
         let container = $('<div/>', {'class': 'channel-members message-group hide-overflow', 'css': {'max-width': '100%', 'cursor': 'pointer'}}),
             avatar  = $('<div/>', {'class': 'avatar-small'}),
             status  = $('<div/>', {'class': 'status status-' + stat}),
@@ -247,7 +286,6 @@ class Mixer
             buttons.append(remove.on('click', (evt) => {
                 container.remove();
                 delete this.config.users[user.user.username];
-                this.config.current = 0;
                 this.config = true;
             })
         )).on('click', (evt) => {
@@ -287,7 +325,7 @@ class Mixer
         name = name;
         $.get('https://mixer.com/api/v1/channels?where=token:in:' + name, {cache: $.now()}, (data) => {
             if(data.length === 0) {
-                this.notify = 'Failed to get user data for user: ' + name;
+                this.notify = 'Failed to find user: ' + name;
             } else {
                 for(let i in data) {
                     this.config.users = $.extend(this.config.users, {[data[i].user.username]: data[i]});
@@ -295,6 +333,12 @@ class Mixer
                         continue;
                     } else {
                         this.dropdown = this.createCard(data[i]);
+                    }
+
+                    if(this.config.current === data[i].id && data[i].hosteeId) {
+                        this.config.current = data[i].hosteeId;
+                        this.chat = this.config.current;
+                        this.video = this.config.current;
                     }
                 }
                 this.config = true;
@@ -325,6 +369,24 @@ class Mixer
         this.mixer.remove();
     }
 
+    list() {
+        if(Object.keys(this.config.users).length === 0) {
+            let empty = $('<div/>', {'class': 'empty-placeholder'}),
+                img   = $('<div/>', {'class': 'image'}).css({'opacity': '0.35', 'background-image': 'url("data:image/svg+xml;base64,' + this.icon + '")'}),
+                body  = $('<div/>', {'class': 'body'}).text('You have no mixer streamers added!');
+            this.dropdown = empty.append(img, body);
+            return;
+        }
+
+        for(let name in this.config.users) {
+            if(this.config.offline === true && this.config.users[name].online === false) {
+                continue;
+            } else {
+                this.dropdown = this.createCard(this.config.users[name]);
+            }
+        }
+    }
+
     /**
      * Shorthand function for Core.prototype.alert
      * @param string message
@@ -336,7 +398,6 @@ class Mixer
     updateCheck() {
         let current = this.getVersion().split('.');
         $.get(this.github.replace('{{FILE}}', 'version.json'), {'now': $.now()} , (data) => {
-        }, 'json').done((data) => {
             let up = data.version.split('.');
             for(let i in up) {
                 if(parseInt(up[i]) > parseInt(current[i])) {
@@ -363,9 +424,11 @@ class Mixer
                     }
                         str += '</ul>';
                     this.alert('Update Available', str);
+                    break;
                 }
             }
-        }).fail((err) => {
+        }, 'json').fail((err) => {
+            console.log(err);
             this.alert('Update Check', 'Failed to check for updates!');
         });
     }
@@ -376,7 +439,7 @@ class Mixer
             this.toolbar.prepend(this.button);
         }
 
-        if(this.config.users.length > 0 && this.config.current === 0) {
+        if(Object.keys(this.config.users).length > 0 && this.config.current === 0) {
             this.config.current = this.config.users[Object.keys(this.config.users)[0]].id;
         }
 
@@ -388,7 +451,6 @@ class Mixer
     }
 
     load() {
-        this.updateCheck();
     }
 
     unload() {
@@ -396,6 +458,7 @@ class Mixer
     }
 
     start() {
+        this.updateCheck();
         this.button = this.icon;
         this.toolbar.prepend(this.button.on('click', (evt) => {
             this.dropdown = false;
@@ -405,13 +468,7 @@ class Mixer
                 left: this.button.offset().left - (this.dropdown.width() - this.button.width())
             });
 
-            for(let name in this.config.users) {
-                if(this.config.offline === true && this.config.users[name].online === false) {
-                    continue;
-                } else {
-                    this.dropdown = this.createCard(this.config.users[name]);
-                }
-            }
+            this.list();
         }));
 
         this._update = setInterval(() => {
