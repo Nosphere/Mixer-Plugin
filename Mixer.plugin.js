@@ -144,7 +144,7 @@ class Mixer
     }
 
     get modal() {
-        return $('#app-mount > * > div[class*="theme-"]');
+        return $('.modal-container').addClass('theme-' + this.theme);
     }
 
     get icon() {

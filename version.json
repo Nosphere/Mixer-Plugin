@@ -1,5 +1,5 @@
 {
-    "version": "0.3.23",
+    "version": "0.3.24",
     "notes": {
         "credits": [
             "NoxDraconem for alpha, beta, delta and omega testing."
@@ -10,7 +10,6 @@
             "If the streamer is hosting someone the status circle will be purple and emebeds will be redirected to the hosted streamer."
         ],
         "fixes": [
-            "<s>Popup now closes on outside clicks.</s>",
             "Status check was not firing correctly.",
             "Fixed status check adding an undefined user.",
             "Fixed update notification being created more then once.",
@@ -18,6 +17,7 @@
         ],
 
         "issues": [
+            "Discord update broke some html styling.",
             "Going to the friends list in discord makes the button have incorrect color",
             "If the popup is open while status check is being done duplicate streamers will be added, this is just a display bug and does not affect the config file at all.",
             "<s>Update notification alert is being created 2 times.</s>"
